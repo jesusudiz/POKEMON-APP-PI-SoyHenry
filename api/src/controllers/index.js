@@ -53,7 +53,7 @@ const getAllPokemon = async (req, res) => {
             return res.status(200).json(pokemon);
         } else {
 
-            const pokemonDB = await Pokemon.findAll();
+            const pokemonDB = await Pokemon.findAll()
     
             return res.json(pokemonDB)
         }
@@ -67,9 +67,10 @@ const getPokemonById= async (req, res)=>{
     try {
         const {id} = req.params;
         const searchedId = await Pokemon.findByPk(id);
+        if(!searchedId) throw new Error('ID ingresado no Existe')
         res.status(200).json(searchedId);
     } catch (error) {
-        res.status(404).json({message:'El ID ingresado no existe, por favor intente con otro'})
+        res.status(404).json({message:error.message})
     }
 }
 
@@ -78,10 +79,11 @@ const getPokemonById= async (req, res)=>{
 const createPokemon = async (req,res)=>{
     try {
         const {nombre,vida,ataque,defensa,velocidad,altura,peso,imagen,tipo}= req.body;
-
+        
         if(!(nombre,vida,ataque,defensa,velocidad,altura,peso,imagen,tipo)){
             throw new Error("faltan parametros para poder crear el Pokemon ingresado")
         } else {
+            
             const newPokemon = await Pokemon.create({
                    nombre: nombre,
                    vida: vida,
@@ -91,17 +93,29 @@ const createPokemon = async (req,res)=>{
                    altura: altura,
                    peso: peso,
                    imagen: imagen,
-                   tipo:[tipo]
+                   tipo:[...tipo]
         })
-        newPokemon.save();
+        
         return res.status(201).json(newPokemon);
     }
     } catch (error) {
         return res.status(400).json({message:error.message})
     }
 }
+
+const getTypes = async ( req, res)=>{
+    try{
+        const getTypesInDB = await Type.findAll()
+
+    return res.status(200).json(getTypesInDB)
+    } catch(error){
+        return res.status(404).json(error.message)
+    }
+        
+}
 module.exports = {
     getAllPokemon,
     getPokemonById,
     createPokemon,
+    getTypes
 }
